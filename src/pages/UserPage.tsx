@@ -48,20 +48,42 @@ const UserPage = () => {
   };
 
   const handlePayment = () => {
-    // Simulate payment
-    toast.success("Payment successful! ₹" + totalCost);
-    const job = addJob({
-      userId: currentUserId,
-      userName: currentUserName || "User",
-      fileName: file!.name,
-      fileSize: file!.size,
-      pageCount,
-      printSide,
-      colorMode,
-      copies,
-    });
-    setCurrentJobId(job.id);
-    setStep("queue");
+    const options = {
+      key: "rzp_test_REPLACE_WITH_YOUR_KEY",
+      amount: totalCost * 100, // Razorpay expects paise
+      currency: "INR",
+      name: "PrintQueue Pro",
+      description: `Print: ${file!.name} (${copies} copies)`,
+      prefill: {
+        name: currentUserName || "User",
+      },
+      theme: {
+        color: "#6366f1",
+      },
+      handler: (response: { razorpay_payment_id: string }) => {
+        toast.success(`Payment successful! ID: ${response.razorpay_payment_id}`);
+        const job = addJob({
+          userId: currentUserId,
+          userName: currentUserName || "User",
+          fileName: file!.name,
+          fileSize: file!.size,
+          pageCount,
+          printSide,
+          colorMode,
+          copies,
+        });
+        setCurrentJobId(job.id);
+        setStep("queue");
+      },
+      modal: {
+        ondismiss: () => {
+          toast.error("Payment cancelled");
+        },
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   return (
