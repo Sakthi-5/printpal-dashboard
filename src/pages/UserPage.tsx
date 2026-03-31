@@ -144,8 +144,8 @@ const UserPage = () => {
                 </div>
               </div>
 
-              <Button onClick={() => setStep("payment")} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity">
-                <CreditCard className="h-5 w-5 mr-2" /> Proceed to Pay ₹{totalCost}
+              <Button onClick={handleSubmit} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity">
+                Submit Print Job (₹{totalCost})
               </Button>
             </CardContent>
           </Card>
