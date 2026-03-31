@@ -63,7 +63,19 @@ export const usePrintQueue = () => {
 };
 
 export const PrintQueueProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [jobs, setJobs] = useState<PrintJob[]>([]);
+  const [jobs, setJobs] = useState<PrintJob[]>(() => {
+    try {
+      const stored = localStorage.getItem("printqueue_jobs");
+      if (stored) {
+        return JSON.parse(stored).map((j: PrintJob) => ({
+          ...j,
+          createdAt: new Date(j.createdAt),
+          completedAt: j.completedAt ? new Date(j.completedAt) : undefined,
+        }));
+      }
+    } catch {}
+    return [];
+  });
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
