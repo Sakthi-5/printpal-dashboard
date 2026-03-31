@@ -151,28 +151,7 @@ const UserPage = () => {
           </Card>
         )}
 
-        {/* Step: Payment */}
-        {step === "payment" && (
-          <Card className="shadow-vibrant border-0 animate-slide-up">
-            <CardHeader>
-              <CardTitle className="font-heading text-foreground">Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-6 rounded-xl gradient-card shadow-card text-center">
-                <p className="text-muted-foreground mb-2">Amount to Pay</p>
-                <p className="text-4xl font-bold font-heading text-gradient">₹{totalCost}</p>
-              </div>
-              <div className="space-y-3">
-                <Button onClick={handlePayment} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity animate-pulse-glow">
-                  <CreditCard className="h-5 w-5 mr-2" /> Pay Now
-                </Button>
-                <Button variant="outline" onClick={() => setStep("options")} className="w-full">
-                  Go Back
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Step: Queue Status */}
         {step === "queue" && currentJobId && (
