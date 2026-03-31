@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { Upload, FileText, Clock, CheckCircle, LogOut, CreditCard } from "lucide-react";
+import { Upload, FileText, Clock, CheckCircle, LogOut } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const UserPage = () => {
@@ -19,7 +19,7 @@ const UserPage = () => {
   const [printSide, setPrintSide] = useState<"single" | "double">("single");
   const [colorMode, setColorMode] = useState<"bw" | "color">("bw");
   const [copies, setCopies] = useState(1);
-  const [step, setStep] = useState<"upload" | "options" | "payment" | "queue">("upload");
+  const [step, setStep] = useState<"upload" | "options" | "queue">("upload");
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const { calculateCost } = usePrintQueue();
 
@@ -47,43 +47,20 @@ const UserPage = () => {
     }
   };
 
-  const handlePayment = () => {
-    const options = {
-      key: "rzp_test_REPLACE_WITH_YOUR_KEY",
-      amount: totalCost * 100, // Razorpay expects paise
-      currency: "INR",
-      name: "PrintQueue Pro",
-      description: `Print: ${file!.name} (${copies} copies)`,
-      prefill: {
-        name: currentUserName || "User",
-      },
-      theme: {
-        color: "#6366f1",
-      },
-      handler: (response: { razorpay_payment_id: string }) => {
-        toast.success(`Payment successful! ID: ${response.razorpay_payment_id}`);
-        const job = addJob({
-          userId: currentUserId,
-          userName: currentUserName || "User",
-          fileName: file!.name,
-          fileSize: file!.size,
-          pageCount,
-          printSide,
-          colorMode,
-          copies,
-        });
-        setCurrentJobId(job.id);
-        setStep("queue");
-      },
-      modal: {
-        ondismiss: () => {
-          toast.error("Payment cancelled");
-        },
-      },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+  const handleSubmit = () => {
+    const job = addJob({
+      userId: currentUserId,
+      userName: currentUserName || "User",
+      fileName: file!.name,
+      fileSize: file!.size,
+      pageCount,
+      printSide,
+      colorMode,
+      copies,
+    });
+    setCurrentJobId(job.id);
+    setStep("queue");
+    toast.success("Print job submitted successfully!");
   };
 
   return (
@@ -167,35 +144,14 @@ const UserPage = () => {
                 </div>
               </div>
 
-              <Button onClick={() => setStep("payment")} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity">
-                <CreditCard className="h-5 w-5 mr-2" /> Proceed to Pay ₹{totalCost}
+              <Button onClick={handleSubmit} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity">
+                Submit Print Job (₹{totalCost})
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* Step: Payment */}
-        {step === "payment" && (
-          <Card className="shadow-vibrant border-0 animate-slide-up">
-            <CardHeader>
-              <CardTitle className="font-heading text-foreground">Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="p-6 rounded-xl gradient-card shadow-card text-center">
-                <p className="text-muted-foreground mb-2">Amount to Pay</p>
-                <p className="text-4xl font-bold font-heading text-gradient">₹{totalCost}</p>
-              </div>
-              <div className="space-y-3">
-                <Button onClick={handlePayment} className="w-full gradient-primary text-primary-foreground font-semibold text-lg py-6 hover:opacity-90 transition-opacity animate-pulse-glow">
-                  <CreditCard className="h-5 w-5 mr-2" /> Pay Now
-                </Button>
-                <Button variant="outline" onClick={() => setStep("options")} className="w-full">
-                  Go Back
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Step: Queue Status */}
         {step === "queue" && currentJobId && (
