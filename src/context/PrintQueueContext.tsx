@@ -76,6 +76,29 @@ export const PrintQueueProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch {}
     return [];
   });
+
+  // Persist jobs to localStorage
+  useEffect(() => {
+    localStorage.setItem("printqueue_jobs", JSON.stringify(jobs));
+  }, [jobs]);
+
+  // Sync across tabs
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "printqueue_jobs" && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue).map((j: PrintJob) => ({
+            ...j,
+            createdAt: new Date(j.createdAt),
+            completedAt: j.completedAt ? new Date(j.completedAt) : undefined,
+          }));
+          setJobs(parsed);
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
   const [currentAdmin, setCurrentAdmin] = useState<Admin | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
