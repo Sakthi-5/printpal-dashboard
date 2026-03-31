@@ -19,7 +19,7 @@ const UserPage = () => {
   const [printSide, setPrintSide] = useState<"single" | "double">("single");
   const [colorMode, setColorMode] = useState<"bw" | "color">("bw");
   const [copies, setCopies] = useState(1);
-  const [step, setStep] = useState<"upload" | "options" | "payment" | "queue">("upload");
+  const [step, setStep] = useState<"upload" | "options" | "queue">("upload");
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const { calculateCost } = usePrintQueue();
 
