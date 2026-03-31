@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
-import { Upload, FileText, Clock, CheckCircle, LogOut, CreditCard } from "lucide-react";
+import { Upload, FileText, Clock, CheckCircle, LogOut } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const UserPage = () => {
