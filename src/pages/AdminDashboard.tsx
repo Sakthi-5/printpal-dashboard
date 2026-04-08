@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { usePrintQueue } from "@/context/PrintQueueContext";
+import { usePrintQueue, BINDING_PRICES } from "@/context/PrintQueueContext";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Users, CheckCircle2, Printer, LogOut } from "lucide-react";
+import { Users, CheckCircle2, Printer, LogOut, IndianRupee } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const AdminDashboard = () => {
@@ -21,12 +21,22 @@ const AdminDashboard = () => {
 
   const handleComplete = (jobId: string) => {
     completeJob(jobId);
-    toast.success("Job marked as completed. Queue updated!");
+    toast.success("Job marked as completed!");
+  };
+
+  const totalRevenue = jobs.filter(j => j.status === "paid" || j.status === "completed").reduce((s, j) => s + j.totalCost, 0);
+
+  const statusBadge = (status: string) => {
+    switch (status) {
+      case "queued": return <Badge variant="default">Queued</Badge>;
+      case "paid": return <Badge className="bg-accent text-accent-foreground">Paid</Badge>;
+      case "completed": return <Badge className="bg-success text-success-foreground">Done</Badge>;
+      default: return <Badge>{status}</Badge>;
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="gradient-primary px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={logo} alt="Logo" width={40} height={40} />
@@ -41,8 +51,7 @@ const AdminDashboard = () => {
       </header>
 
       <div className="container mx-auto p-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
           <Card className="shadow-card border-0 gradient-card">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="h-14 w-14 rounded-xl gradient-primary flex items-center justify-center">
@@ -76,9 +85,19 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+          <Card className="shadow-card border-0 gradient-card">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="h-14 w-14 rounded-xl bg-accent flex items-center justify-center">
+                <IndianRupee className="h-7 w-7 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Revenue</p>
+                <p className="text-3xl font-bold font-heading text-foreground">₹{totalRevenue}</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Queue Table */}
         <Card className="shadow-card border-0 animate-slide-up">
           <CardHeader>
             <CardTitle className="font-heading text-foreground">Print Queue</CardTitle>
@@ -96,9 +115,10 @@ const AdminDashboard = () => {
                       <TableHead>File</TableHead>
                       <TableHead>Pages</TableHead>
                       <TableHead>Copies</TableHead>
-                      <TableHead>Type</TableHead>
+                      <TableHead>Side</TableHead>
                       <TableHead>Color</TableHead>
-                      <TableHead>Cost (₹)</TableHead>
+                      <TableHead>Binding</TableHead>
+                      <TableHead>Cost</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Action</TableHead>
                     </TableRow>
@@ -108,19 +128,16 @@ const AdminDashboard = () => {
                       <TableRow key={job.id}>
                         <TableCell className="font-medium">{i + 1}</TableCell>
                         <TableCell>{job.userName}</TableCell>
-                        <TableCell className="max-w-[150px] truncate">{job.fileName}</TableCell>
+                        <TableCell className="max-w-[120px] truncate">{job.fileName}</TableCell>
                         <TableCell>{job.pageCount}</TableCell>
                         <TableCell>{job.copies}</TableCell>
                         <TableCell>{job.printSide === "double" ? "Double" : "Single"}</TableCell>
                         <TableCell>{job.colorMode === "color" ? "Color" : "B&W"}</TableCell>
+                        <TableCell>{BINDING_PRICES[job.binding || "none"]?.label || "None"}</TableCell>
                         <TableCell className="font-semibold">₹{job.totalCost}</TableCell>
+                        <TableCell>{statusBadge(job.status)}</TableCell>
                         <TableCell>
-                          <Badge variant={job.status === "queued" ? "default" : "secondary"} className={job.status === "completed" ? "bg-success text-success-foreground" : ""}>
-                            {job.status === "queued" ? "In Queue" : "Done"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {job.status === "queued" && (
+                          {(job.status === "queued" || job.status === "paid") && (
                             <Button size="sm" variant="outline" onClick={() => handleComplete(job.id)} className="text-success border-success hover:bg-success/10">
                               <CheckCircle2 className="h-4 w-4 mr-1" /> Complete
                             </Button>
